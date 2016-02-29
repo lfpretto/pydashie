@@ -3,6 +3,37 @@ from dashie_sampler import DashieSampler
 import random
 import collections
 
+
+
+class GetSampler(DashieSampler):
+    def __init__(self, *args, **kwargs):
+        DashieSampler.__init__(self, *args, **kwargs)
+        self._nCount = 10
+        self._arPoints = [0] * self._nCount
+
+    def request(self):
+        return random.randint(0, 100)
+
+    def sample(self):
+        nValue = self.request()
+        self._arPoints.pop(0)
+        self._arPoints.append(nValue)
+        nLast = self._arPoints[-2]
+
+        #print self._arPoints
+
+        s = {'value': 10,
+             'current': nValue,
+             'test' : 33,
+             'last': nLast}
+
+        #print s
+        return s
+
+
+
+
+
 class SynergySampler(DashieSampler):
     def __init__(self, *args, **kwargs):
         DashieSampler.__init__(self, *args, **kwargs)

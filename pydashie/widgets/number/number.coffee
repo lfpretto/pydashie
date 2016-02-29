@@ -10,6 +10,9 @@ class Dashing.Number extends Dashing.Widget
         "#{diff}%"
     else
       ""
+  @accessor 'more-info', ->
+    diff = parseInt(@get('test'))
+    "#{diff}"
 
   @accessor 'arrow', ->
     if @get('last')
