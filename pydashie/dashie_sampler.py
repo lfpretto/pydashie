@@ -1,21 +1,26 @@
 import datetime
-import json
 from repeated_timer import RepeatedTimer
 
 class DashieSampler:
-    def __init__(self, app, interval, name='UnknowSampler'):
-        self._app = app
-        self._name = name
-        self._timer = RepeatedTimer(interval, self._sample)
+    def __init__(self, strName, objConnection, nInterval, settings=dict()):
+        self._objConnection = objConnection
+        self._strName = strName
+        if nInterval > 0 :
+            self._objTimer = RepeatedTimer(nInterval, self._sample)
+        self._dcSettings = settings
+
+    def getSetting(self, strKey, objDefault=None):
+        return self._dcSettings.get(strKey, objDefault)
+
+    def start(self, nInterval):
+        pass
 
     def stop(self):
-        self._timer.stop()
-
-    def name(self):
         '''
-        Child class implements this function
+        Stop the Sampler from running in the interval
+        :return:
         '''
-        return self._name
+        self._objTimer.stop()
 
     def sample(self):
         '''
@@ -23,16 +28,16 @@ class DashieSampler:
         '''
         return {}
 
-    def _send_event(self, widget_id, body):
-        body['id'] = widget_id
-        body['updatedAt'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S +0000')
-        self._app.send(body)
-        #formatted_json = 'data: %s\n\n' % (json.dumps(body))
-        #self._app.last_events[widget_id] = formatted_json
-        #for event_queue in self._app.events_queue.values():
-        #    event_queue.put(formatted_json)
+    def _send(self, dcBody):
+        dcBody['id'] = self._strName
+        dcBody['updatedAt'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S +0000')
+        self._objConnection.send(dcBody)
 
     def _sample(self):
-        data = self.sample()
-        if data:
-            self._send_event(self.name(), data)
+        objData = self.sample()
+        if objData:
+            self._send(objData)
+
+
+if __name__ == "__main__":
+    pass

@@ -2,10 +2,10 @@ from example_samplers import *
 
 def run(app, xyzzy):
     samplers = [
-        SynergySampler(xyzzy, 3),
-        BuzzwordsSampler(xyzzy, 2), # 10
-        ConvergenceSampler(xyzzy, 1),
-        GetSampler(xyzzy, 5, 'luiz')
+        SynergySampler('synergy', xyzzy, 3),
+        BuzzwordsSampler('buzzwords', xyzzy, 2), # 10
+        ConvergenceSampler('convergence', xyzzy, 1),
+        GetSampler('luiz', xyzzy, 5)
     ]
 
     try:
