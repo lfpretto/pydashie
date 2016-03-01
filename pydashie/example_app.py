@@ -1,11 +1,14 @@
 from example_samplers import *
+from samplers.request_sampler import GetRequestNumber, GetRequestMeter
 
 def run(app, xyzzy):
     samplers = [
         SynergySampler('synergy', xyzzy, 3),
         BuzzwordsSampler('buzzwords', xyzzy, 2), # 10
         ConvergenceSampler('convergence', xyzzy, 1),
-        GetSampler('luiz', xyzzy, 5)
+
+        GetRequestMeter('meterTest', xyzzy, 4, {'url': 'http://127.0.0.1:5000/test'}),
+        GetRequestNumber('luiz', xyzzy, 5, {'url': 'http://127.0.0.1:5000/test'})
     ]
 
     try:

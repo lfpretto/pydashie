@@ -99,12 +99,16 @@ class NumberSampler(DashieSampler):
         :return:
         '''
         nValue = self.sample()
-        if nValue and nValue.isnumeric():
+        if nValue and isinstance(nValue, (int, long, float)):
             self.storage(nValue)
             dcItem = {
                 'current': nValue,
                 'last': self.last(),
+                'more-info': 'Testing More Info'
             }
+            if nValue > 50:
+                dcItem['alarm'] = True
+            else: dcItem['alarm'] = False
             self._send(dcItem)
 
 
@@ -131,9 +135,11 @@ class ListSampler(DashieSampler):
 
 
 class ChartSampler(DashieSampler):
+    seedX = 0
+
     def sample(self):
         '''
-        Sample method should return a dictonary. Or None if none value to send.
+        Sample method should return a list with 2 values, x and y or 1 item; just y. Or None if none value to send.
         :return:
         '''
         return None
@@ -143,8 +149,6 @@ class ChartSampler(DashieSampler):
         Calculate the necessary values for a List to be sampler
         :return:
         '''
-
-    def _sample(self):
         arItems = self.sample()
         if arItems:
             if len(arItems) > 1:
@@ -152,14 +156,33 @@ class ChartSampler(DashieSampler):
                 y = arItems[1]
             else:
                 y = arItems[0]
-
-            self.items.append({'x': self.seedX,
-                               'y': random.randint(0,20)})
+                x = self.seedX
+            self.storage({'x': x, 'y': y})
             self.seedX += 1
-            if len(self.items) > 10:
-                self.items.popleft()
-            return {'points': list(self.items)}
+            return {'points': self._arStorage}
 
+
+class MeterSampler(DashieSampler):
+    def sample(self):
+        '''
+        Sample method should return a number. Or None if none value to send.
+        :return:
+        '''
+        return None
+
+    def _sample(self):
+        '''
+        Calculate the necessary values for a Number to be sampler
+        :return:
+        '''
+        nValue = self.sample()
+        if nValue and isinstance(nValue, (int, long, float)):
+            self.storage(nValue)
+            dcItem = {
+                'value': nValue,
+                'more-info': 'Testing info'
+            }
+            self._send(dcItem)
 
 
 if __name__ == "__main__":

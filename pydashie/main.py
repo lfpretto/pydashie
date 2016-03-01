@@ -36,6 +36,8 @@ def javascripts():
 
             'widgets/clock/clock.coffee',
             'widgets/number/number.coffee',
+            'widgets/meter/meter.coffee',
+            #'widgets/comments/comments.coffee',
         ]
         nizzle = True
         if not nizzle:
@@ -47,7 +49,7 @@ def javascripts():
             if '.coffee' in path:
                 log.info('Compiling Coffee for %s ' % path)
                 contents = str(coffeescript.compile_file(path))
-                print '-------------------------'
+                print '-----------', path, '--------------'
                 print contents
             else:
                 f = open(path)
@@ -159,6 +161,13 @@ def events():
     current_app.logger.info('New Client %s connected. Total Clients: %s' % (event_stream_port, len(xyzzy)))
     #current_event_queue = xyzzy.openStream(event_stream_port)
     return Response(xyzzy.openStream(event_stream_port), mimetype='text/event-stream')
+
+
+@app.route('/test')
+def test():
+    import random
+    respoonse = {"value" : random.randint(0,100)}
+    return Response(json.dumps(respoonse), mimetype='text/event-stream')
 
 
 '''
