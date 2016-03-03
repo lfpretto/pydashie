@@ -3,13 +3,17 @@ from repeated_timer import RepeatedTimer
 
 class DashieSampler:
     def __init__(self, strName, objConnection, nInterval, settings=dict(), nSamples=2):
-        self._objConnection = objConnection
-        self._nSamples = nSamples
-        self._strName = strName
         self._dcSettings = settings
+        self._strName = strName
+        self._objConnection = objConnection
+
+        self._nSamples = nSamples
         self._arStorage = list()
         self._objTimer = None
         self.start(nInterval)
+
+    def __del__(self):
+        self.stop()
 
     def last(self):
         '''
@@ -57,12 +61,24 @@ class DashieSampler:
         '''
         if self._objTimer:
             self._objTimer.stop()
+            del self._objTimer
+            self._objTimer = None
 
     def sample(self):
         '''
         Child class implements this function
         '''
         return None
+
+    def process(self, objData):
+        '''
+        Process the Data To the Widdget
+        :param objData:
+        :return:
+        '''
+        if objData:
+            self.storage(objData)
+            self._send(objData)
 
     def _send(self, dcBody):
         '''
@@ -72,7 +88,7 @@ class DashieSampler:
         '''
         dcBody['id'] = self._strName
         dcBody['updatedAt'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S +0000')
-        self._objConnection.send(dcBody)
+        return self._objConnection.send(dcBody)
 
     def _sample(self):
         '''
@@ -80,25 +96,14 @@ class DashieSampler:
         :return:
         '''
         objData = self.sample()
-        if objData:
-            self.storage(objData)
-            self._send(objData)
-
+        self.process(objData)
 
 class NumberSampler(DashieSampler):
-    def sample(self):
-        '''
-        Sample method should return a number. Or None if none value to send.
-        :return:
-        '''
-        return None
-
-    def _sample(self):
+    def process(self, nValue):
         '''
         Calculate the necessary values for a Number to be sampler
         :return:
         '''
-        nValue = self.sample()
         if nValue and isinstance(nValue, (int, long, float)):
             self.storage(nValue)
             dcItem = {
@@ -109,23 +114,16 @@ class NumberSampler(DashieSampler):
             if nValue > 50:
                 dcItem['alarm'] = True
             else: dcItem['alarm'] = False
-            self._send(dcItem)
+            return self._send(dcItem)
+        return False
 
 
 class ListSampler(DashieSampler):
-    def sample(self):
-        '''
-        Sample method should return a dictonary. Or None if none value to send.
-        :return:
-        '''
-        return None
-
-    def _sample(self):
+    def process(self, dcList):
         '''
         Calculate the necessary values for a List to be sampler
         :return:
         '''
-        dcList = self.sample()
         if dcList and isinstance(dcList, dict):
             self.storage(dcList)
             arItems = list()
@@ -137,19 +135,11 @@ class ListSampler(DashieSampler):
 class ChartSampler(DashieSampler):
     seedX = 0
 
-    def sample(self):
-        '''
-        Sample method should return a list with 2 values, x and y or 1 item; just y. Or None if none value to send.
-        :return:
-        '''
-        return None
-
-    def _sample(self):
+    def process(self, arItems):
         '''
         Calculate the necessary values for a List to be sampler
         :return:
         '''
-        arItems = self.sample()
         if arItems:
             if len(arItems) > 1:
                 x = arItems[0]
@@ -163,19 +153,11 @@ class ChartSampler(DashieSampler):
 
 
 class MeterSampler(DashieSampler):
-    def sample(self):
-        '''
-        Sample method should return a number. Or None if none value to send.
-        :return:
-        '''
-        return None
-
-    def _sample(self):
+    def process(self, nValue):
         '''
         Calculate the necessary values for a Number to be sampler
         :return:
         '''
-        nValue = self.sample()
         if nValue and isinstance(nValue, (int, long, float)):
             self.storage(nValue)
             dcItem = {
