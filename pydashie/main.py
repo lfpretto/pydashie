@@ -60,13 +60,13 @@ def javascripts():
             'assets/javascripts/jquery.gridster.js',
             'assets/javascripts/jquery.leanModal.min.js',
             'assets/javascripts/dashing.js',
-            #'assets/javascripts/dashing.coffee',
-            #'assets/javascripts/dashing.gridster.coffee',
             'assets/javascripts/jquery.knob.js',
             'assets/javascripts/rickshaw.min.js',
-            'assets/javascripts/application-compiled.js',
+            'assets/javascripts/application.js',
+
+            #'assets/javascripts/dashing.coffee',
+            #'assets/javascripts/dashing.gridster.coffee',
             #'assets/javascripts/application.coffee',
-            #'assets/javascripts/app.js',
 
             'widgets/number/number.js',
             'widgets/meter/meter.js',
@@ -113,9 +113,9 @@ def javascripts():
 @app.route('/assets/application.css')
 def application_css():
     scripts = [
-        #'assets/stylesheets/application2.css',
-        'assets/font-awesome.css',
-        'assets/stylesheets/app.css',
+        'assets/stylesheets/font-awesome.css',
+        'assets/stylesheets/widgets.css',
+        'assets/stylesheets/application.css',
         'assets/stylesheets/jquery.gridster.css',
     ]
     output = ''
