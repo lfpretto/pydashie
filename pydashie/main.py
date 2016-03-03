@@ -51,7 +51,7 @@ def javascripts():
     if not hasattr(current_app, 'javascripts'):
         import coffeescript
         scripts = [
-            'assets/javascripts/coffee-script.js',
+            #'assets/javascripts/coffee-script.js',
             'assets/javascripts/jquery.js',
             'assets/javascripts/es5-shim.js',
             'assets/javascripts/d3.v2.min.js',
