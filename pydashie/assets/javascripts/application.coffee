@@ -14,5 +14,11 @@ Dashing.on 'ready', ->
       widget_base_dimensions: Dashing.widget_base_dimensions
       avoid_overlapped_widgets: !Dashing.customGridsterLayout
       draggable:
-        stop: Dashing.showGridsterInstructions
-        start: -> Dashing.currentWidgetPositions = Dashing.getWidgetPositions()
+        stop: ->
+            #Dashing.showGridsterInstructions()
+            newData = JSON.stringify(Dashing.getWidgetPositions())
+            if newData != Dashing.currentWidgetPositions
+                Dashing.currentWidgetPositions = newData
+                console.log newData
+            true
+        start: -> Dashing.getWidgetPositions()

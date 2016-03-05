@@ -12,7 +12,6 @@ class ConnectionStreams:
 
     def send(self, body):
         formatted_json = 'data: %s\n\n' % (json.dumps(body))
-        print formatted_json
         for event_queue in self.events_queue.values():
             event_queue.put(formatted_json)
         self.last_events.append(formatted_json)

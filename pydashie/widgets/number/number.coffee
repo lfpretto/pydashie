@@ -22,15 +22,15 @@ class Dashing.Number extends Dashing.Widget
       #if parseInt(@get('current')) > parseInt(@get('last')) then 'icon-arrow-up' else 'icon-arrow-down'
 
   onData: (data) ->
-    console.log($(@get('node')))
-    console.log($(@node))
+    #console.log($(@get('node')))
+    #console.log($(@node))
 
     if @get('alarm') == true
         $(@node).context.style.backgroundColor='darkred'
     else
         $(@node).context.style.cssText=''
 
-    console.log($(@node).context.style)
+    #console.log($(@node).context.style)
 
     if data.status
       $(@get('node')).addClass("status-#{data.status}")

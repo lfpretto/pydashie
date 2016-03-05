@@ -1,46 +1,46 @@
-import os
-import logging
-from flask import Flask, render_template, Response, send_from_directory, request, current_app
 import json
-import datetime
-from connection_streams import ConnectionStreams
+import logging
+import os
 
-xyzzy = ConnectionStreams()
+from flask import Flask, render_template, Response, send_from_directory, request, current_app
+from libs.widget_loader import DashingBoard
+
+from DashboardDefinitions import *
+
+
+def saveFile(strId, dcInput):
+    import os, json
+    strFile = os.path.realpath(__file__)
+    strPath = os.path.dirname(strFile)
+    strSave = os.path.join(strPath, "dashboards", strId + '.json')
+    print strSave
+    f = open(strSave, 'w')
+    f.write(json.dumps(dcInput))
+    f.close()
+
+def loadFile(strId):
+    import os, json
+    strFile = os.path.realpath(__file__)
+    strPath = os.path.dirname(strFile)
+    strSave = os.path.join(strPath, "dashboards", strId + '.json')
+    print strSave
+    f = open(strSave, 'r')
+    objResponse = json.loads(f.read())
+    f.close()
+    return objResponse
+
+
+dcDefinitions = loadFile("test")
+objDashboard = DashingBoard(dcDefinitions)
 app = Flask(__name__)
 logging.basicConfig()
 log = logging.getLogger(__name__)
-dcSamplers = dict()
 
-
-def addSampler(strID, objSampler, bRestart=False):
-    #from dashie_sampler import DashieSampler
-    print objSampler
-    if objSampler:
-        if strID in dcSamplers:
-            if bRestart:
-                objCurrentSampler = dcSamplers[strID]
-                del objCurrentSampler
-            else:
-                return False
-        dcSamplers[strID] = objSampler
-        return True
-    return False, 'not Sampler'
-
-def startSampler(objConnections, strID, strType, dcConfig=dict(), bRestart=False):
-    import importlib
-    objModule = importlib.import_module("dashie_sampler")
-    print objModule
-    objSampler = getattr(objModule, strType + "Sampler")
-    print objSampler
-    if objSampler:
-        nInterval = dcConfig.get("interval", 5)
-        nSamples = dcConfig.get("samples", 2)
-        print 'Adding', addSampler(strID, objSampler(strID, objConnections, nInterval, dcConfig, nSamples))
-    return True
 
 @app.route("/")
 def main():
-    return render_template('test.html', title='pyDashie')
+    dcDashboard = objDashboard._dcDefinitions
+    return render_template('index.html', dashboard=dcDashboard)
     
 @app.route("/dashboard/<dashlayout>/")
 def custom_layout(dashlayout):
@@ -49,40 +49,51 @@ def custom_layout(dashlayout):
 @app.route("/assets/application.js")
 def javascripts():
     if not hasattr(current_app, 'javascripts'):
-        import coffeescript
         scripts = [
-            #'assets/javascripts/coffee-script.js',
-            'assets/javascripts/jquery.js',
-            'assets/javascripts/es5-shim.js',
-            'assets/javascripts/d3.v2.min.js',
-            'assets/javascripts/batman.js',
-            'assets/javascripts/batman.jquery.js',
-            'assets/javascripts/jquery.gridster.js',
-            'assets/javascripts/jquery.leanModal.min.js',
-            'assets/javascripts/dashing.js',
-            'assets/javascripts/jquery.knob.js',
-            'assets/javascripts/rickshaw.min.js',
-            'assets/javascripts/application.js',
+            'assets/js/jquery.js',
+            'assets2/javascripts/d3-3.2.8.js',
+            'assets2/javascripts/gridster/jquery.gridster.min.js',
+            'assets2/javascripts/gridster/jquery.leanModal.min.js',
+            'assets2/javascripts/jquery.knob.js',
+            'assets2/javascripts/rickshaw-1.4.3.min.js',
+            'assets/js/es5-shim.js',
+            'assets/js/batman.js',
+            'assets/js/batman.jquery.js',
+            'assets/js/dashing.js',
+            'assets2/javascripts/dashing.gridster.js',
+            'assets2/javascripts/application.js',
 
+            #'assets/javascripts/jquery.js',
+            #'assets/javascripts/es5-shim.js',
+            #'assets/javascripts/d3.v2.min.js',
+            #'assets/javascripts/batman.js',
+            #'assets/javascripts/batman.jquery.js',
+            #'assets/javascripts/jquery.gridster.js',
+            #'assets/javascripts/jquery.leanModal.min.js',
+            #'assets/javascripts/jquery.knob.js',#Meter knob for the Meter Widget
+            #'assets/js/dashing.js',
+            #'assets/javascripts/dashing.js',
+            #'assets/javascripts/dashing.gridster.js',
+            #'assets/javascripts/rickshaw.min.js',
+            #'assets/javascripts/application.js',
             #'assets/javascripts/dashing.coffee',
             #'assets/javascripts/dashing.gridster.coffee',
             #'assets/javascripts/application.coffee',
-
-            'widgets/number/number.js',
-            'widgets/meter/meter.js',
-
+            ##'widgets/number/number.js',
+            ##'widgets/meter/meter.js',
             #'widgets/clock/clock.coffee',
             #'widgets/number/number.coffee',
             #'widgets/meter/meter.coffee',
             #'widgets/comments/comments.coffee',
         ]
-        nizzle = True
-        if not nizzle:
-            scripts = ['assets/javascripts/application.js']
+        print scripts
+        print objDashboard._arJavascript
+        scripts.extend(objDashboard._arJavascript)
 
-        output = []
+        current_app.javascripts = ""
+        import coffeescript
         for path in scripts:
-            output.append('// JS: %s\n' % path)
+            current_app.javascripts += '// JS: %s\n' % str(path)
             if '.coffee' in path:
                 log.info('Compiling Coffee for %s ' % path)
                 contents = str(coffeescript.compile_file(path, bare=True))
@@ -92,32 +103,22 @@ def javascripts():
                 f = open(path)
                 contents = f.read()
                 f.close()
-            output.append(contents)
-
-        if not nizzle:
-            f = open('/tmp/foo.js', 'w')
-            for o in output:
-                print >> f, o
-            f.close()
-
-            f = open('/tmp/foo.js', 'rb')
-            output = f.read()
-            f.close()
-            current_app.javascripts = output
-        else:
-            #print output
-            current_app.javascripts = '\n'.join(output)
-
+            current_app.javascripts += contents
     return Response(current_app.javascripts, mimetype='application/javascript')
 
 @app.route('/assets/application.css')
 def application_css():
     scripts = [
-        'assets/stylesheets/font-awesome.css',
-        'assets/stylesheets/widgets.css',
-        'assets/stylesheets/application.css',
-        'assets/stylesheets/jquery.gridster.css',
+        'assets2/stylesheets/font-awesome.css',
+        'assets2/stylesheets/application.css',
+        'assets2/stylesheets/jquery.gridster.min.css',
+        #'assets/stylesheets/widgets.css',
+        #'assets/stylesheets/font-awesome.css',
+        #'assets/stylesheets/application.css',
+        #'assets/stylesheets/jquery.gridster.css',
+
     ]
+    scripts.extend(objDashboard._arStyles)
     output = ''
     for path in scripts:
         output += open(path).read()
@@ -126,7 +127,7 @@ def application_css():
 
 @app.route('/fonts/<path:path>')
 def send_js(path):
-    return send_from_directory('assets/fonts', path)
+    return send_from_directory('assets2/fonts', path)
 
 @app.route('/assets/images/<path:filename>')
 def send_static_img(filename):
@@ -145,68 +146,54 @@ def widget_html(widget_name):
 
 @app.route('/add/<widget_id>/<nValue>')
 def addValue(widget_id, nValue):
-    if widget_id in dcSamplers:
-        print nValue
-        objResult = dcSamplers[widget_id].process(int(nValue))
-        return Response(json.dumps(objResult), mimetype='text/json')
-    print dcSamplers
-    return Response('{False}', mimetype='text/json')
-
+    response = objDashboard.push(widget_id, nValue)
+    return Response(json.dumps(response), mimetype='text/json')
 
 @app.route('/events')
 def events():
     event_stream_port = request.environ['REMOTE_PORT']
-    current_app.logger.info('New Client %s connected. Total Clients: %s' % (event_stream_port, len(xyzzy)))
+    current_app.logger.info('New Client %s connected. Total Clients: %s' % (event_stream_port, len(objDashboard._objStreams)))
     #current_event_queue = xyzzy.openStream(event_stream_port)
-    return Response(xyzzy.openStream(event_stream_port), mimetype='text/event-stream')
+    return Response(objDashboard._objStreams.openStream(event_stream_port), mimetype='text/event-stream')
 
 
 @app.route('/test')
 def test():
-
-    print dcSamplers
-
-    print dcSamplers['luiz']._send({'current': 10})
-
-    print xyzzy.events_queue
-
     import random
     respoonse = {"value" : random.randint(0,100)}
     return Response(json.dumps(respoonse), mimetype='text/event-stream')
 
 
+@app.route('/shutdown', methods=['GET'])
+def shutdown():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return 'Server shutting down...'
 
 
 
 
 
 def purge_streams():
-    big_queues = [port for port, queue in xyzzy.events_queue if len(queue) > xyzzy.MAX_QUEUE_LENGTH]
+    big_queues = [port for port, queue in objDashboard._objStreams.events_queue if len(queue) > objDashboard._objStreams.MAX_QUEUE_LENGTH]
     for big_queue in big_queues:
         current_app.logger.info('Client %s is stale. Disconnecting. Total Clients: %s' %
-                                (big_queue, len(xyzzy.events_queue)))
+                                (big_queue, len(objDashboard._objStreams.events_queue)))
         del queue[big_queue]
 
 
 def close_stream(*args, **kwargs):
     event_stream_port = args[2][1]
-    xyzzy.closeStream(event_stream_port)
-    log.info('Client %s disconnected. Total Clients: %s' % (event_stream_port, len(xyzzy.events_queue)))
+    objDashboard._objStreams.closeStream(event_stream_port)
+    log.info('Client %s disconnected. Total Clients: %s' % (event_stream_port, len(objDashboard._objStreams.events_queue)))
 
 
 
 if __name__ == "__main__":
     import SocketServer
     SocketServer.BaseServer.handle_error = close_stream
-    import example_app
-
-    from samplers.request_sampler import GetRequestNumber
-
-    objRequest = GetRequestNumber('luiz', xyzzy, 5, {'url': 'http://127.0.0.1:5000/test'})
-    startSampler(xyzzy, "luiz2", "Meter", {"interval": 0})
-    addSampler("luiz", objRequest)
-
-    #example_app.run(app, xyzzy)
     try:
         app.run(debug=True,
                 port=5000,
@@ -214,12 +201,10 @@ if __name__ == "__main__":
                 use_reloader=False,
                 use_debugger=True
                 )
+        print "test"
     finally:
         print "Disconnecting clients"
-        xyzzy.stop()
-
-        print "Stopping %d timers" % len(dcSamplers)
-        for (i, sampler) in dcSamplers:
-            sampler.stop()
-
+        saveFile("test", objDashboard._dcDefinitions)
+        objDashboard.stop()
     print "Done"
+    exit()

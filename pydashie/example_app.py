@@ -1,9 +1,9 @@
 from samplers.request_sampler import GetRequestNumber, GetRequestMeter
-from dashie_sampler import DashieSampler
+from samplers.sampler import DashingSampler
 import random
 import collections
 
-class SynergySampler(DashieSampler):
+class SynergySampler(DashingSampler):
     def __init__(self, *args, **kwargs):
         DashieSampler.__init__(self, *args, **kwargs)
         self._last = 0
@@ -18,7 +18,7 @@ class SynergySampler(DashieSampler):
         self._last = s['current']
         return s
 
-class BuzzwordsSampler(DashieSampler):
+class BuzzwordsSampler(DashingSampler):
     def name(self):
         return 'buzzwords'
 
@@ -34,7 +34,7 @@ class BuzzwordsSampler(DashieSampler):
         random.shuffle(items)
         return {'items':items}
 
-class ConvergenceSampler(DashieSampler):
+class ConvergenceSampler(DashingSampler):
     def name(self):
         return 'convergence'
 
@@ -57,8 +57,8 @@ def run(app, xyzzy):
         SynergySampler('synergy', xyzzy, 3),
         BuzzwordsSampler('buzzwords', xyzzy, 2), # 10
         ConvergenceSampler('convergence', xyzzy, 1),
-        GetRequestMeter('meterTest', xyzzy, 4, {'url': 'http://127.0.0.1:5000/test'}),
-        GetRequestNumber('luiz', xyzzy, 5, {'url': 'http://127.0.0.1:5000/test'})
+        #GetRequestMeter('meterTest', xyzzy, 4, {'url': 'http://127.0.0.1:5000/test'}),
+        #GetRequestNumber('luiz', xyzzy, 5, {'url': 'http://127.0.0.1:5000/test'})
     ]
 
     try:

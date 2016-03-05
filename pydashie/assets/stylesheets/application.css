@@ -75,9 +75,6 @@ h3 {
   font-weight: 600;
   color: #fff; }
 
-.gridster {
-  margin: 0px auto; }
-
 .icon-background {
   width: 100% !important;
   height: 100%;
@@ -104,8 +101,11 @@ h3 {
   padding: 25px 12px;
   text-align: center;
   width: 100%;
+  height: 100%;
   display: table-cell;
-  vertical-align: middle; }
+  vertical-align: middle;
+  float:center;
+  }
 
 .widget.status-warning {
   background-color: #e82711;

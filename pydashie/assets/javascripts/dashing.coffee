@@ -86,7 +86,7 @@ Dashing.AnimatedValue =
 
 Dashing.widgets = widgets = {}
 Dashing.lastEvents = lastEvents = {}
-Dashing.debugMode = true
+Dashing.debugMode = false
 
 source = new EventSource('/events')
 source.addEventListener 'open', (e) ->
@@ -106,6 +106,8 @@ source.addEventListener 'message', (e) =>
     for widget in widgets[data.id]
       widget.receiveData(data)
 
+Dashing.getWidgetPositions = ->
+  $('.gridster ul:first').gridster().data('gridster').serialize()
 
 $(document).ready ->
   Dashing.run()

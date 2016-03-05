@@ -5,30 +5,20 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
-  <title>{{title}}</title>
-
+  <title>{{dashboard.title}}</title>
   <!-- The javascript and css are managed by sprockets. The files can be found in the /assets folder-->
   <script type="text/javascript" src="/assets/application.js"></script>
   <link rel="stylesheet" href="/assets/application.css">
-
   <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700' rel='stylesheet' type='text/css'>
   <link rel="icon" href="/assets/images/favicon.ico">
-
 </head>
   <body>
     <div id="container"><div class="gridster"><ul>
-
-            {% for w in dashboard.widgets %}
+        {% for w in dashboard.widgets %}
         <li data-row="{{w.position.row}}" data-col="{{w.position.col}}" data-sizex="{{w.size.x}}" data-sizey="{{w.size.y}}">
-        <div data-id="{{w.id}}" data-view="{{w.type}}" data-title="{{w.title.title()}}"></div>
-        {% if w.icon %}
-          <i class="icon-{{w.icon}} icon-background"></i>
-        {% endif %}
-        </li>
-      {% endfor %}
-
-
+        <div data-id="{{w.id}}" data-view="{{w.type.title()}}" data-title="{{w.title}}"></div>
+        {% if w.icon %}<i class="icon-{{w.icon}} icon-background"></i>{% endif %}</li>
+        {% endfor %}
     </ul></div></div>
   </body>
 </html>

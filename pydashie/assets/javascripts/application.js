@@ -11,12 +11,23 @@
       $('.gridster').width(contentWidth);
       return $('.gridster ul:first').gridster({
         widget_margins: Dashing.widget_margins,
-        widget_base_dimensions: Dashing.widget_base_dimensions,
+        widget_base_dimensions: [300,300], //Dashing.widget_base_dimensions,
         avoid_overlapped_widgets: !Dashing.customGridsterLayout,
+        resize: {
+            enabled: true,
+        },
         draggable: {
-          stop: Dashing.showGridsterInstructions,
+          stop: function() {
+            var newData;
+            newData = JSON.stringify(Dashing.getWidgetPositions());
+            if (newData !== Dashing.currentWidgetPositions) {
+              Dashing.currentWidgetPositions = newData;
+              console.log(newData);
+            }
+            return true;
+          },
           start: function() {
-            return Dashing.currentWidgetPositions = Dashing.getWidgetPositions();
+            return Dashing.getWidgetPositions();
           }
         }
       });
