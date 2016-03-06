@@ -1,3 +1,7 @@
+/*
+  //=require_directory .
+  //=require_tree ../../widgets
+*/
 @-webkit-keyframes status-warning-background {
   0% {
     background-color: #e82711; }
@@ -66,7 +70,7 @@ h1 {
 
 h2 {
   text-transform: uppercase;
-  font-size: 50px;
+  font-size: 76px;
   font-weight: 700;
   color: #fff; }
 
@@ -75,16 +79,20 @@ h3 {
   font-weight: 600;
   color: #fff; }
 
+.gridster {
+  margin: 0px auto; }
+
 .icon-background {
+  pointer-events: none;
   width: 100% !important;
   height: 100%;
   position: absolute;
   left: 0;
   top: 0;
   opacity: 0.1;
-  font-size: 250px;
-  line-height: 350px;
-  text-align: center; }
+  font-size: 275px;
+  text-align: center;
+  margin-top: 82px; }
 
 .list-nostyle {
   list-style: none; }
@@ -98,14 +106,11 @@ h3 {
   cursor: pointer; }
 
 .widget {
-  padding: 25px 12px;
   text-align: center;
-  width: 100%;
-  height: 100%;
+  width: inherit;
+  height: inherit;
   display: table-cell;
-  vertical-align: middle;
-  float:center;
-  }
+  vertical-align: middle; }
 
 .widget.status-warning {
   background-color: #e82711;

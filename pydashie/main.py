@@ -1,11 +1,9 @@
 import json
 import logging
 import os
-
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
-from libs.widget_loader import DashingBoard
+from libs.dashboard import DashingBoard
 
-from DashboardDefinitions import *
 
 
 def saveFile(strId, dcInput):
@@ -50,41 +48,18 @@ def custom_layout(dashlayout):
 def javascripts():
     if not hasattr(current_app, 'javascripts'):
         scripts = [
-            'assets/js/jquery.js',
-            'assets2/javascripts/d3-3.2.8.js',
-            'assets2/javascripts/gridster/jquery.gridster.min.js',
-            'assets2/javascripts/gridster/jquery.leanModal.min.js',
-            'assets2/javascripts/jquery.knob.js',
-            'assets2/javascripts/rickshaw-1.4.3.min.js',
-            'assets/js/es5-shim.js',
-            'assets/js/batman.js',
-            'assets/js/batman.jquery.js',
-            'assets/js/dashing.js',
-            'assets2/javascripts/dashing.gridster.js',
-            'assets2/javascripts/application.js',
-
-            #'assets/javascripts/jquery.js',
-            #'assets/javascripts/es5-shim.js',
-            #'assets/javascripts/d3.v2.min.js',
-            #'assets/javascripts/batman.js',
-            #'assets/javascripts/batman.jquery.js',
-            #'assets/javascripts/jquery.gridster.js',
-            #'assets/javascripts/jquery.leanModal.min.js',
-            #'assets/javascripts/jquery.knob.js',#Meter knob for the Meter Widget
-            #'assets/js/dashing.js',
-            #'assets/javascripts/dashing.js',
-            #'assets/javascripts/dashing.gridster.js',
-            #'assets/javascripts/rickshaw.min.js',
-            #'assets/javascripts/application.js',
-            #'assets/javascripts/dashing.coffee',
-            #'assets/javascripts/dashing.gridster.coffee',
-            #'assets/javascripts/application.coffee',
-            ##'widgets/number/number.js',
-            ##'widgets/meter/meter.js',
-            #'widgets/clock/clock.coffee',
-            #'widgets/number/number.coffee',
-            #'widgets/meter/meter.coffee',
-            #'widgets/comments/comments.coffee',
+            'assets/javascripts/jquery.js',
+            'assets/javascripts/d3-3.2.8.js',
+            'assets/javascripts/gridster/jquery.gridster.min.js',
+            'assets/javascripts/gridster/jquery.leanModal.min.js',
+            'assets/javascripts/jquery.knob.js',
+            'assets/javascripts/rickshaw-1.4.3.min.js',
+            'assets/javascripts/es5-shim.js',
+            'assets/javascripts/batman.js',
+            'assets/javascripts/batman.jquery.js',
+            'assets/javascripts/dashing.js',
+            'assets/javascripts/dashing.gridster.js',
+            'assets/javascripts/application.js',
         ]
         print scripts
         print objDashboard._arJavascript
@@ -109,14 +84,9 @@ def javascripts():
 @app.route('/assets/application.css')
 def application_css():
     scripts = [
-        'assets2/stylesheets/font-awesome.css',
-        'assets2/stylesheets/application.css',
-        'assets2/stylesheets/jquery.gridster.min.css',
-        #'assets/stylesheets/widgets.css',
-        #'assets/stylesheets/font-awesome.css',
-        #'assets/stylesheets/application.css',
-        #'assets/stylesheets/jquery.gridster.css',
-
+        'assets/stylesheets/font-awesome.css',
+        'assets/stylesheets/application.css',
+        'assets/stylesheets/jquery.gridster.min.css',
     ]
     scripts.extend(objDashboard._arStyles)
     output = ''
@@ -127,7 +97,7 @@ def application_css():
 
 @app.route('/fonts/<path:path>')
 def send_js(path):
-    return send_from_directory('assets2/fonts', path)
+    return send_from_directory('assets/fonts', path)
 
 @app.route('/assets/images/<path:filename>')
 def send_static_img(filename):
@@ -156,12 +126,18 @@ def events():
     #current_event_queue = xyzzy.openStream(event_stream_port)
     return Response(objDashboard._objStreams.openStream(event_stream_port), mimetype='text/event-stream')
 
+@app.route('/update', methods=['POST', 'GET'])
+def update():
+    print request
+    content = request.get_json(silent=True)
+    print content
+    return Response(json.dumps(True), mimetype='text/json')
 
 @app.route('/test')
 def test():
     import random
     respoonse = {"value" : random.randint(0,100)}
-    return Response(json.dumps(respoonse), mimetype='text/event-stream')
+    return Response(json.dumps(respoonse), mimetype='text/json')
 
 
 @app.route('/shutdown', methods=['GET'])
