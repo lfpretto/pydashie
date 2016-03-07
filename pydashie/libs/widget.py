@@ -65,8 +65,13 @@ class DashingWidget:
         :return:
         '''
         dcBody['id'] = self._strId
-        dcBody['updatedAt'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S +0000')
+        dcBody['updatedAt'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print dcBody
         return self._objConnection.send(dcBody)
+
+    def _sendStorageAs(self, strKey):
+        print self._arStorage
+        self._send({strKey: self._arStorage})
 
     def start(self):
         '''

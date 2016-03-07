@@ -1,4 +1,5 @@
 from pydashie.libs.widget import DashingWidget
+import datetime
 
 
 class GraphWidget(DashingWidget):
@@ -14,9 +15,9 @@ class GraphWidget(DashingWidget):
                 x = arItems[0]
                 y = arItems[1]
             else:
-                y = arItems[0]
-                x = self.seedX
+                y = int(arItems[0])
+                x = self.seedX #datetime.datetime.now().strftime('%H:%M')
             self.storage({'x': x, 'y': y})
+            self._sendStorageAs('points')
             self.seedX += 1
-            return {'points': self._arStorage}
 
