@@ -19,7 +19,7 @@
   <body>
     <div id="container"><div class="gridster"><ul>
 
-            {% for w in dashboard.widgets %}
+            {% for w in widgets %}
         <li data-row="{{w.position.row}}" data-col="{{w.position.col}}" data-sizex="{{w.size.x}}" data-sizey="{{w.size.y}}">
         <div data-id="{{w.id}}" data-view="{{w.type}}" data-title="{{w.title.title()}}"></div>
         {% if w.icon %}

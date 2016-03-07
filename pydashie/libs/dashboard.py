@@ -7,6 +7,7 @@ class DashingBoard:
     _dcWidgets = dict()
 
     def __init__(self, dcDefinitions):
+        self._arWidgetSettings = dcDefinitions.get('widgets', list())
         self._objStreams = ConnectionStreams()
         self._dcWidgets = dict()
         self._dcDefinitions = dcDefinitions
@@ -16,6 +17,21 @@ class DashingBoard:
 
     def __del__(self):
         self._unloadWidgets()
+
+    def updateLayout(self, arLayout):
+        nIndex = len(self._arWidgetSettings)-1
+        for dcLayout in arLayout:
+            if nIndex >= 0:
+                self._arWidgetSettings[nIndex]['layout'] = {
+                    "col": dcLayout.get("col", self._arWidgetSettings[nIndex]['layout'].get("col", 1)),
+                    "row": dcLayout.get("row", self._arWidgetSettings[nIndex]['layout'].get("row", 1)),
+                    "x": dcLayout.get("size_x", self._arWidgetSettings[nIndex]['layout'].get("x", 1)),
+                    "y": dcLayout.get("size_y", self._arWidgetSettings[nIndex]['layout'].get("y", 1))
+                }
+                nIndex -= 1
+            else:
+                return False
+        return True
 
     def stop(self):
         self._unloadWidgets()
@@ -41,8 +57,7 @@ class DashingBoard:
         self._dcWidgets = dict()
 
     def _loadWidgets(self):
-        arWidgets = self._dcDefinitions.get('widgets', list)
-        for dcWidget in arWidgets:
+        for dcWidget in self._arWidgetSettings:
             print dcWidget
             if self._startWidget(dcWidget):
                 strType = dcWidget.get('type')

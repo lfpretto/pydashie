@@ -5,7 +5,7 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>{{dashboard.title}}</title>
+  <title>{{title}}</title>
   <!-- The javascript and css are managed by sprockets. The files can be found in the /assets folder-->
   <script type="text/javascript" src="/assets/application.js"></script>
   <link rel="stylesheet" href="/assets/application.css">
@@ -14,10 +14,10 @@
 </head>
   <body>
     <div id="container"><div class="gridster"><ul>
-        {% for w in dashboard.widgets %}
-        <li data-row="{{w.position.row}}" data-col="{{w.position.col}}" data-sizex="{{w.size.x}}" data-sizey="{{w.size.y}}">
-        <div data-id="{{w.id}}" data-view="{{w.type.title()}}" data-title="{{w.title}}"></div>
-        {% if w.icon %}<i class="icon-{{w.icon}} icon-background"></i>{% endif %}</li>
+        {% for w in widgets %}
+        <li data-row="{{w.get('row')}}" data-col="{{w.get('col')}}" data-sizex="{{w.get('x')}}" data-sizey="{{w.get('y')}}" style="background-color:#ff9618">
+        <div data-id="{{w.get('id')}}" data-view="{{w.get('type').title()}}" data-title="{{w.get('title')}}" {% for t, v in w.getTags().iteritems() %} {{t}}="{{v}}" {% endfor %}></div>
+        {% if w.get('icon') %}<i class="icon-{{w.get('icon')}} icon-background"></i>{% endif %}</li>
         {% endfor %}
     </ul></div></div>
   </body>

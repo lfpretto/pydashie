@@ -37,8 +37,8 @@ log = logging.getLogger(__name__)
 
 @app.route("/")
 def main():
-    dcDashboard = objDashboard._dcDefinitions
-    return render_template('index.html', dashboard=dcDashboard)
+    strTitle = objDashboard._dcDefinitions.get('title', 'pyDashing')
+    return render_template('index.html', title=strTitle, widgets=objDashboard._dcWidgets.values())
     
 @app.route("/dashboard/<dashlayout>/")
 def custom_layout(dashlayout):
@@ -131,13 +131,22 @@ def update():
     print request
     content = request.get_json(silent=True)
     print content
+    if content:
+        objDashboard.updateLayout(content)
     return Response(json.dumps(True), mimetype='text/json')
 
 @app.route('/test')
-def test():
+@app.route('/test/<strType>')
+def test(strType='number'):
     import random
-    respoonse = {"value" : random.randint(0,100)}
-    return Response(json.dumps(respoonse), mimetype='text/json')
+    if strType.lower() == 'number':
+        response = {"value": random.randint(0,100)}
+    elif strType.lower() == 'list':
+        response = {"value": [random.randint(0,100)]}
+    else:
+        response = {"value": None}
+    print response
+    return Response(json.dumps(response), mimetype='text/json')
 
 
 @app.route('/shutdown', methods=['GET'])

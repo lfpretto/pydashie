@@ -13,6 +13,19 @@ class DashingWidget:
     def __del__(self):
         self.stop()
 
+
+
+
+    def get(self, strId):
+        if strId in ('row', 'col', 'x', 'y'):
+            objLayout = self._dcSettings.get('layout', None)
+            if objLayout:
+                return objLayout.get(strId, 1)
+            else:
+                return '1'
+        else:
+            return self._dcSettings.get(strId, '')
+
     def last(self):
         '''
         Gets the last value sampled
@@ -93,8 +106,17 @@ class DashingWidget:
         return True
 
     def __str__(self):
-        pass
+        strIcon = self._dcSettings.get('icon', None)
+        strHTML = ''
+        strHTML += '<li data-row="" data-col="" data-sizex="" data-sizey="">'
+        strHTML += '<div data-id="{{w.id}}" data-view="{{w.type.title()}}" data-title="{{w.title}}"></div>'
+        if strIcon:
+            strHTML += '<i class="icon-{{w.icon}} icon-background"></i>'
+        strHTML += '</li>'
+        return strHTML
 
+    def getTags(self):
+        return dict()
 
 
 
