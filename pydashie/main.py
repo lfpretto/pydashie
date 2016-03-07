@@ -59,7 +59,8 @@ def javascripts():
             'assets/javascripts/batman.jquery.js',
             'assets/javascripts/dashing.js',
             'assets/javascripts/dashing.gridster.js',
-            'assets/javascripts/application.js',
+            #'assets/javascripts/application.js',
+            'pyDashing.js'
         ]
         print scripts
         print objDashboard._arJavascript
@@ -87,6 +88,7 @@ def application_css():
         'assets/stylesheets/font-awesome.css',
         'assets/stylesheets/application.css',
         'assets/stylesheets/jquery.gridster.min.css',
+        'pyDashing.css'
     ]
     scripts.extend(objDashboard._arStyles)
     output = ''
