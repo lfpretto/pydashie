@@ -16,8 +16,9 @@
     <div id="container"><div class="gridster"><ul>
         {% for w in widgets %}
         <li data-row="{{w.get('row')}}" data-col="{{w.get('col')}}" data-sizex="{{w.get('x')}}" data-sizey="{{w.get('y')}}" style="background-color:#ff9618">
-        <div data-id="{{w.get('id')}}" data-view="{{w.get('type').title()}}" data-title="{{w.get('title')}}" {% for t, v in w.getTags().iteritems() %} {{t}}="{{v}}" {% endfor %}></div>
-        {% if w.get('icon') %}<i class="icon-{{w.get('icon')}} icon-background"></i>{% endif %}</li>
+        {{w|safe}}
+        {% if w.get('icon') %}<i class="icon-{{w.get('icon')}} icon-background"></i>{% endif %}
+        </li>
         {% endfor %}
     </ul></div></div>
     <div id="saving-message">Saving ...</div>

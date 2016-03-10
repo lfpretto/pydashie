@@ -4,6 +4,7 @@ import datetime
 
 class GraphWidget(DashingWidget):
     seedX = 0
+    renderTemplate = ''
 
     def process(self, arItems):
         '''

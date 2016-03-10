@@ -1,5 +1,4 @@
 import os
-
 from pydashie.libs.streams import ConnectionStreams
 
 
@@ -8,6 +7,8 @@ class DashingBoard:
 
     def __init__(self, dcDefinitions):
         self._arWidgetSettings = dcDefinitions.get('widgets', list())
+        self._strId = dcDefinitions.get('id', 'test')
+        self._strTitle = dcDefinitions.get('title', 'pyDashing')
         self._objStreams = ConnectionStreams()
         self._dcWidgets = dict()
         self._dcDefinitions = dcDefinitions
@@ -49,8 +50,7 @@ class DashingBoard:
     def _unloadWidgets(self):
         print self._dcWidgets
         while len(self._dcWidgets) > 0:
-        #for strKey in self._dcWidgets:
-            strKey, objWidget = self._dcWidgets.popitem() # [strKey]
+            strKey, objWidget = self._dcWidgets.popitem()  # [strKey]
             if not objWidget.stop():
                 print 'Error Deleting', strKey, 'Sampler'
                 del objWidget
@@ -64,7 +64,6 @@ class DashingBoard:
                 strPath = os.path.join('widgets', strType, strType)
                 self._arJavascript.append(strPath + '.js')
                 self._arStyles.append(strPath + '.css')
-                #self._strRenderHTML
             else:
                 print 'not Loaded'
 
@@ -74,11 +73,11 @@ class DashingBoard:
         try:
             import importlib
             objModule = importlib.import_module("pydashie.widgets." + strType)
-            objWidgetClass =  getattr(objModule, strType.title() + "Widget")
+            objWidgetClass = getattr(objModule, strType.title() + "Widget")
         except Exception as e:
             print e
             return False
-        objWidget = objWidgetClass(strId, self._objStreams, dcSettings) #['samples'])
+        objWidget = objWidgetClass(strId, self._objStreams, dcSettings)
         if objWidget.start():
             self._addWidget(strId, objWidget)
             return True
@@ -99,16 +98,11 @@ class DashingBoard:
     def renderHTML(self):
         pass
 
-    def renderWidgets(self):
-        strHTMLWidgets = ''
-        for objWidget in self._dcWidgets:
-            #print objWidget.get('title')
-            strHTMLWidgets += '<li data-row="2" data-col="1" data-sizex="1" data-sizey="1">'
-            strHTMLWidgets += '<div data-id="luiz2" data-view="Meter" data-title="Push Test" data-min="0" data-max="200"></div>'
-            strHTMLWidgets += '<i class="icon-refresh icon-background"></i></li>'
-        strHTMLWidgets += ''
-        return  strHTMLWidgets
-
     def renderDashboard(self, bDebug=False):
         pass
 
+    def getWidget(self, strId=None):
+        if strId:
+            return self._dcWidgets.get(strId, None)
+        else:
+            return self._dcWidgets.values()

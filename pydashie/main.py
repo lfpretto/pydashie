@@ -38,7 +38,10 @@ log = logging.getLogger(__name__)
 @app.route("/")
 def main():
     strTitle = objDashboard._dcDefinitions.get('title', 'pyDashing')
-    return render_template('index.html', title=strTitle, widgets=objDashboard._dcWidgets.values())
+    arWidgets = objDashboard.getWidget()
+    print arWidgets[0]
+    #print json.dumps(arWidgets)
+    return render_template('index.html', title=strTitle, widgets=arWidgets)
     
 @app.route("/dashboard/<dashlayout>/")
 def custom_layout(dashlayout):

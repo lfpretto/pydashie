@@ -1,59 +1,57 @@
 {
-   "widgets":[
-      {
-         "title":"Luiz Number",
-         "samples":30,
-         "sampler":{
-            "url":"http://127.0.0.1:5000/test",
-            "interval":5,
-            "type":"request"
-         },
-         "layout":{
-            "col":2,
-            "row":2,
-            "y":1,
-            "x":1
-         },
-         "type":"number",
-         "id":"number-type"
-      },
-      {
-         "title":"Luiz Meter",
-         "samples":30,
-         "sampler":{
-            "url":"http://127.0.0.1:5000/test",
-            "interval":3,
-            "type":"request"
-         },
-         "layout":{
-            "color": "green",
-            "col":2,
-            "row":1,
-            "y":1,
-            "x":1
-         },
-         "type":"meter",
-         "id":"meter-type"
-      },
-     {
-         "title":"Luiz chart",
-         "samples":30,
-         "sampler":{
-            "url":"http://127.0.0.1:5000/test/list",
-            "interval":3,
-            "type":"request"
-         },
-         "layout":{
-            "color": "green",
-            "col":2,
-            "row":1,
-            "y":1,
-            "x":1
-         },
-         "type":"graph",
-         "id":"graph-type"
+  "widgets": [
+    {
+      "type": "clock",
+      "id": "clock-type",
+      "title": "Luiz clock",
+      "samples": 0,
+      "layout": {
+        "col": 1,
+        "row": 1,
+        "x":1,
+        "y":1,
+        "color":"green",
+        "icon":"clock"
       }
-   ],
-   "id":"test",
-   "title":"My Test Dashboard"
+    },
+    {
+      "type": "number",
+      "id": "number-type",
+      "title": "Luiz Number",
+      "samples": 30,
+      "sampler": {
+        "url": "http://127.0.0.1:5000/test",
+        "interval": 5,
+        "type": "request"
+      },
+      "layout": {
+        "col": 2,
+        "row": 2,
+        "x":1,
+        "y":1,
+        "color":"green",
+        "icon":"warning"
+      }
+    },
+    {
+      "type": "meter",
+      "id": "meter-type",
+      "title": "Luiz Meter",
+      "samples": 30,
+      "sampler": {
+        "url": "http://127.0.0.1:5000/test",
+        "interval": 3,
+        "type": "request"
+      },
+      "layout": {
+        "col": 1,
+        "row": 2,
+        "x":1,
+        "y":1,
+        "color":"green"
+      }
+    }
+  ],
+  "id": "test",
+  "title": "My Test Dashboard"
 }
