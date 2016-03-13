@@ -10,18 +10,25 @@ class ConnectionStreams:
         self.using_events = True
         self.stopped = False
 
-    def send(self, body):
+    def __del__(self):
+        self.stop()
+
+    def __len__(self):
+        return len(self.events_queue)
+
+    def send(self, body, bStoreEvent=True):
         formatted_json = 'data: %s\n\n' % (json.dumps(body))
         for event_queue in self.events_queue.values():
             event_queue.put(formatted_json)
-        self.last_events.append(formatted_json)
-        self.last_events.pop(0)
+        if bStoreEvent:
+            self.last_events.append(formatted_json)
+            self.last_events.pop(0)
         return formatted_json
 
     def openStream(self, streamID):
         current_event_queue = Queue.Queue()
         self.events_queue[streamID] = current_event_queue
-        #Start the newly connected client off by pushing the current last events
+        # Start the newly connected client off by pushing the current last events
         for event in self.last_events:
             current_event_queue.put(event)
         while not self.stopped:
@@ -29,7 +36,8 @@ class ConnectionStreams:
                 data = current_event_queue.get(timeout=0.1)
                 yield data
             except Queue.Empty:
-                #this makes the server quit nicely - previously the queue threads would block and never exit. This makes it keep checking for dead application
+                # this makes the server quit nicely - previously the queue threads would block and never exit.
+                # This makes it keep checking for dead application
                 pass
 
     def closeStream(self, streamID):
@@ -38,6 +46,5 @@ class ConnectionStreams:
     def stop(self):
         self.stopped = True
 
-    def __len__(self):
-        return len(self.events_queue)
+
 

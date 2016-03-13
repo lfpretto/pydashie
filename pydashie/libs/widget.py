@@ -9,21 +9,25 @@ class DashingWidget:
         The child classes should implement the 'process' method, if any special
         processing of the information needs to be done
     """
+
     def __init__(self, strId, objConnection, dcSettings):
         self._objSampler = None
-        self._strId = strId
         self._objConnection = objConnection
-        if dcSettings:
-            self._dcSettings = dcSettings
-            self._dcSettings['view'] = dcSettings.get('type', 'number').title()
-        else:
-            self._dcSettings = dict()
+        self._strId = strId
+        self._strTitle = dcSettings.get('title', "")
+        self._strType = dcSettings.get('type', 'number')
+        self._dcSettings = dcSettings.get('settings', dict())
+        self._dcSampler = dcSettings.get('sampler', None)
+        self._dcLayout = dcSettings.get('layout', dict())
         self._nSamples = dcSettings.get('samples', 0)
         self._arStorage = list()
         self._strHTML = ""
 
     def __del__(self):
         self.stop()
+
+    def __str__(self):
+        return str(self._strHTML)
 
     def get(self, strId):
         """ Gets a Parameter from the Widget.
@@ -34,14 +38,8 @@ class DashingWidget:
         Returns:
             The Value of the parameter
         """
-        if strId in ('row', 'col', 'x', 'y', 'icon'):
-            objLayout = self._dcSettings.get('layout', None)
-            if objLayout:
-                return objLayout.get(strId, 1)
-            else:
-                return '1'
-        else:
-            return self._dcSettings.get(strId, '')
+        print self._dcLayout
+        return self._dcLayout.get(strId, '')
 
     def last(self):
         """ Gets the last value sampled
@@ -117,21 +115,22 @@ class DashingWidget:
 
     def start(self):
         """ Loads and Start the Sampler configured for this Widget
+
         Returns:
             True
         """
         bResult = self._runHTML()
-        bResult = bResult & self._runSampler()
+        #bResult = bResult & self._runSampler()
         return bResult
 
     def _runSampler(self):
         """ Runs the Widget SAMPLER based on the 'sampler' configs in the settings.
+
         Returns:
             True if successful, False otherwise
         """
-        dcSamplerSettings = self._dcSettings.get('sampler', None)
-        if dcSamplerSettings:
-            strType = dcSamplerSettings.get('type', None)
+        if self._dcSampler:
+            strType = self._dcSampler.get('type', None)
             if not strType:
                 print 'Invalid Type'
                 return False
@@ -143,7 +142,7 @@ class DashingWidget:
                 print e
                 return False
             else:
-                self._objSampler = objSamplerClass(self, dcSamplerSettings)
+                self._objSampler = objSamplerClass(self, self._dcSampler)
                 return self._objSampler.start()
         return True
 
@@ -166,36 +165,71 @@ class DashingWidget:
     def _runHTML(self):
         """ Generates the HTML representation of the Widget.
             The string is can be accessed by the 'render' method.
+
         Returns:
             bool: True if no exceptions occurred, False otherwise
         """
         try:
             from jinja2 import Environment, FileSystemLoader
-            strType = self._dcSettings["type"]
-            strFile = os.path.join("widgets", strType, 'div.html')
+            strFile = os.path.join("widgets", self._strType, 'div.html')
             if os.path.isfile(strFile):
                 env = Environment(loader=FileSystemLoader(os.path.dirname(strFile)))
-                self._strHTML = env.get_template('div.html').render(**self._dcSettings)
             else:
                 env = Environment(loader=FileSystemLoader('templates'))
-                self._strHTML = env.get_template('div.html').render(**self._dcSettings)
+            self._strHTML = env.get_template('div.html').render(id=self._strId,
+                                                                view=self._strType.title(),
+                                                                title=self._strTitle,
+                                                                **self._dcSettings)
         except Exception as e:
             print e
             return False
         else:
             return True
 
-    def __str__(self):
-        return str(self._strHTML)
-
     def render(self):
         """ Generates the HTML representation of the Widget.
+
         Returns:
             string: Containing the safe HTML representation of the widget.
                 It will return an empty string if HTML is not generated.
         """
         return str(self._strHTML)
 
+    def updateLayout(self, dcLayout):
+        """ Update the layout parameters of the widget in memory
 
+        Args:
+            dcLayout: The structure key and value of the paramters of the layout
 
+        Returns:
+            bool: True if layout updated, False otherwise
+        """
+        if isinstance(dcLayout, dict):
+            for strId in dcLayout:
+                self._dcLayout[strId] = dcLayout[strId]
+            return True
+        return False
 
+    def getLayout(self):
+        """ Gets the Layout settings of the widget
+
+        Returns:
+            dict(): Key and value of the layout parameters.
+        """
+        return self._dcLayout
+
+    def getSettings(self):
+        """ Returns the structured settings of the widget
+
+        Returns:
+            dict(): containing the structure of the widget settings.
+        """
+        return {
+            "_html": self._strHTML,
+            "id": self._strId,
+            "type": self._strType,
+            "title": self._strTitle,
+            "settings": self._dcSettings,
+            "layout": self._dcLayout,
+            "sampler": self._dcSampler
+        }

@@ -135,7 +135,7 @@
 
   Dashing.lastEvents = lastEvents = {};
 
-  Dashing.debugMode = false;
+  Dashing.debugMode = true;
 
   source = new EventSource('events');
 

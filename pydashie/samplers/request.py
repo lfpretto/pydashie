@@ -20,11 +20,10 @@ class RequestSampler(TimerSampler):
     def _sampler(self):
         try:
             r = requests.get(self.get("url"))
-            #print r
             assert r.status_code == 200
             objResponse = json.loads(r.text)
             if objResponse:
-                self._process(objResponse.get("value", None))
+                self._process(objResponse)
         except Exception as e:
             print e
             print 'Error'

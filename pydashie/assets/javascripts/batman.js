@@ -681,7 +681,11 @@
       }
     },
     underscore: function(string) {
-      return string.replace(underscore_rx1, '$1_$2').replace(underscore_rx2, '$1_$2').replace('-', '_').toLowerCase();
+        console.log(string);
+
+      var test = string.replace(underscore_rx1, '$1_$2').replace(underscore_rx2, '$1_$2').replace('-', '_').toLowerCase();
+      console.log(test);
+      return test;
     },
     capitalize: function(string) {
       return string.replace(capitalize_rx, function(m, p1, p2) {

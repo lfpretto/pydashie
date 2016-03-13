@@ -1,6 +1,18 @@
 (function() {
     console.log("Yeah! pyDashing running !!");
+
+    /*
+    Batman.Filters.dashize = function(str) {
+        return str.charAt(0).toLowerCase() + str.slice(1);
+    };
+    */
+    Batman.helpers.underscore = function(str) {
+        console.log(str);
+        return str.charAt(0).toLowerCase() + str.slice(1);
+    };
+
     Dashing.updateLayout = function() {
+        if(Dashing.allowRefresh >= 0) Dashing.allowRefresh = 2;
         console.log(Dashing.currentWidgetPositions);
         $.ajax({
             url: '/update',
@@ -25,11 +37,11 @@
         if (newData !== Dashing.currentWidgetPositions) {
             Dashing.currentWidgetPositions = newData;
             $('#save-gridster').slideDown();
+            if(Dashing.allowRefresh >= 0) Dashing.allowRefresh = 0;
         }
     }
 
       $(function() {
-        //$('#save-gridster').leanModal();
         return $('#save-gridster').click(function() {
             Dashing.updateLayout();
         });
@@ -40,6 +52,7 @@
     Dashing.widget_margins || (Dashing.widget_margins = [3, 3]);
     Dashing.widget_base_dimensions || (Dashing.widget_base_dimensions = [300, 320]);
     Dashing.numColumns || (Dashing.numColumns = 4);
+    Dashing.allowRefresh = 1;
     contentWidth = (Dashing.widget_base_dimensions[0] + (Dashing.widget_margins[0] * 3)) * Dashing.numColumns;
     return Batman.setImmediate(function() {
       $('.gridster').width(contentWidth);
@@ -49,12 +62,12 @@
         avoid_overlapped_widgets: !Dashing.customGridsterLayout,
         extra_rows: 1,
         serialize_params: function($w, wgd) {
-            console.log('serialize');
-            console.log($w)
-            console.log(wgd)
+            //console.log('serialize');
+            //console.log($w)
+            //console.log(wgd)
             var wID = $w.find('div').attr('data-id');
             var wColor = $w.find('div').css('background-color');
-            return {id: wID, color: wColor, col: wgd.col, row: wgd.row, size_x: wgd.size_x, size_y: wgd.size_y }
+            return {id: wID, color: wColor, col: wgd.col, row: wgd.row, x: wgd.size_x, y: wgd.size_y }
         },
         resize: {
             stop: Dashing.changeLayout,
@@ -71,3 +84,4 @@
   });
 
 }).call(this);
+

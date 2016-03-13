@@ -5,7 +5,6 @@ from flask import Flask, render_template, Response, send_from_directory, request
 from libs.dashboard import DashingBoard
 
 
-
 def saveFile(strId, dcInput):
     import os, json
     strFile = os.path.realpath(__file__)
@@ -63,12 +62,12 @@ def javascripts():
             'assets/javascripts/dashing.js',
             'assets/javascripts/dashing.gridster.js',
             #'assets/javascripts/application.js',
+            'dashingInternal.js',
             'pyDashing.js'
         ]
         print scripts
         print objDashboard._arJavascript
         scripts.extend(objDashboard._arJavascript)
-
         current_app.javascripts = ""
         import coffeescript
         for path in scripts:
@@ -111,13 +110,29 @@ def send_static_img(filename):
 
 @app.route('/views/<widget_name>.html')
 def widget_html(widget_name):
+    if widget_name == 'dashing_internal':
+        return '<span data-bind="internal"></span>'
+
+    if '_' in widget_name:
+        arTitles = [s.title() for s in widget_name.split('_')]
+        print arTitles
+        arTitles[0] = arTitles[0].lower()
+        strWidget = ''.join(arTitles)
+    else:
+        strWidget = widget_name
+
+
+    print "+++++++++++++++++", strWidget
     html = '%s.html' % widget_name
-    path = os.path.join('widgets', widget_name, html)
+    path = os.path.join('widgets', strWidget, html)
     if os.path.isfile(path):
         f = open(path)
         contents = f.read()
         f.close()
         return contents
+    else:
+        # print "+++++++++++++++++ cant find ", widget_name
+        return ""
 
 @app.route('/add/<widget_id>/<nValue>')
 def addValue(widget_id, nValue):
@@ -131,7 +146,7 @@ def events():
     #current_event_queue = xyzzy.openStream(event_stream_port)
     return Response(objDashboard._objStreams.openStream(event_stream_port), mimetype='text/event-stream')
 
-@app.route('/update', methods=['POST', 'GET'])
+@app.route('/update', methods=['POST'])
 def update():
     print request
     content = request.get_json(silent=True)
@@ -139,6 +154,15 @@ def update():
     if content:
         objDashboard.updateLayout(content)
     return Response(json.dumps(True), mimetype='text/json')
+
+
+@app.route('/reload')
+def reload():
+    import datetime
+    objReload = {"id": 'dashing-internal-functions', "action": "reload", "updatedAt":0}
+    objDashboard._objStreams.send(objReload, False)
+    return Response(json.dumps(objReload), mimetype='text/json')
+
 
 @app.route('/test')
 @app.route('/test/<strType>')
@@ -150,7 +174,14 @@ def test(strType='number'):
         response = {"value": [random.randint(0,100)]}
     else:
         response = {"value": None}
-    print response
+
+    response = {
+        "number1": random.randint(0,100),
+        "number2": random.randint(0,100),
+        "graph1": [random.randint(0,100)]
+    }
+
+    #print response
     return Response(json.dumps(response), mimetype='text/json')
 
 
@@ -181,12 +212,15 @@ def close_stream(*args, **kwargs):
 
 
 
+
+
 if __name__ == "__main__":
     import SocketServer
     SocketServer.BaseServer.handle_error = close_stream
     try:
-        app.run(debug=True,
-                port=5000,
+        app.run(host="0.0.0.0",
+                debug=True,
+                port=8666,
                 threaded=True,
                 use_reloader=False,
                 use_debugger=True

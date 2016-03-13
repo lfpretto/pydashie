@@ -8,6 +8,7 @@
   <title>{{title}}</title>
   <!-- The javascript and css are managed by sprockets. The files can be found in the /assets folder-->
   <script type="text/javascript" src="/assets/application.js"></script>
+    <script type="text/javascript" src="/fonts/test.js"></script>
   <link rel="stylesheet" href="/assets/application.css">
   <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700' rel='stylesheet' type='text/css'>
   <link rel="icon" href="/assets/images/favicon.ico">
@@ -15,12 +16,14 @@
   <body>
     <div id="container"><div class="gridster"><ul>
         {% for w in widgets %}
-        <li data-row="{{w.get('row')}}" data-col="{{w.get('col')}}" data-sizex="{{w.get('x')}}" data-sizey="{{w.get('y')}}" style="background-color:#ff9618">
+        <li data-row="{{w.get('row')}}" data-col="{{w.get('col')}}" data-sizex="{{w.get('x')}}" data-sizey="{{w.get('y')}}">
         {{w|safe}}
         {% if w.get('icon') %}<i class="icon-{{w.get('icon')}} icon-background"></i>{% endif %}
         </li>
         {% endfor %}
     </ul></div></div>
+    <div data-id="dashing-test" data-view="UpperCase" style="visibility: hidden"><span data-bind="internal"></span></div>
+    <div data-id="dashing-internal-functions" data-view="DashingInternal" style="visibility: hidden"></div>
     <div id="saving-message">Saving ...</div>
     <a id="save-gridster" href="#saving-message">
         Save this layout
