@@ -22,6 +22,7 @@ class DashingWidget:
         self._nSamples = dcSettings.get('samples', 0)
         self._arStorage = list()
         self._strHTML = ""
+        self._runHTML()
 
     def __del__(self):
         self.stop()
@@ -111,56 +112,9 @@ class DashingWidget:
         Returns:
             bool: True if send successful, false otherwise
         """
-        return self._send({strKey: self._arStorage})
-
-    def start(self):
-        """ Loads and Start the Sampler configured for this Widget
-
-        Returns:
-            True
-        """
-        bResult = self._runHTML()
-        #bResult = bResult & self._runSampler()
-        return bResult
-
-    def _runSampler(self):
-        """ Runs the Widget SAMPLER based on the 'sampler' configs in the settings.
-
-        Returns:
-            True if successful, False otherwise
-        """
-        if self._dcSampler:
-            strType = self._dcSampler.get('type', None)
-            if not strType:
-                print 'Invalid Type'
-                return False
-            try:
-                import importlib
-                objModule = importlib.import_module("pydashie.samplers." + strType)
-                objSamplerClass = getattr(objModule, strType.title() + "Sampler")
-            except Exception as e:
-                print e
-                return False
-            else:
-                self._objSampler = objSamplerClass(self, self._dcSampler)
-                return self._objSampler.start()
-        return True
-
-    def stop(self):
-        """ Stops the Sampler configured for the Widget
-
-        Returns:
-             bool: True '_objSampler' deleted, False otherwise
-        """
-        if self._objSampler:
-            try:
-                return self._objSampler.stop()
-            except Exception as e:
-                print e
-                del self._objSampler
-            if self._objSampler:
-                return False
-        return True
+        if len(self._arStorage) > 1:
+            return self._send({strKey: self._arStorage})
+        return False
 
     def _runHTML(self):
         """ Generates the HTML representation of the Widget.
@@ -231,5 +185,6 @@ class DashingWidget:
             "title": self._strTitle,
             "settings": self._dcSettings,
             "layout": self._dcLayout,
-            "sampler": self._dcSampler
+            "sampler": self._dcSampler,
+            "samples": self._nSamples
         }
