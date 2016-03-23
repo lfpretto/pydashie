@@ -2,7 +2,7 @@ PyDashing
 ########
 
 PyDashing is a port of `Dashing <https://github.com/Shopify/dashing>`_ by `Shopify <http://www.shopify.com/>`_ to Python
-The original development was done by `evolvedlight <http://evolvedlight.github.com/pydashie/>`.
+The original development was done by `evolvedlight <http://evolvedlight.github.com/pydashie/>`_.
 
 This version makes the full dashboard more friendly and extensible, with:
 
