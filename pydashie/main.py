@@ -1,7 +1,10 @@
 import json
 import logging
 import os
+import sys
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
+
+#sys.path.append(os.pardir(__file__))
 from libs.dashboard import DashingBoard
 
 #TODO: save / load from file
@@ -15,7 +18,7 @@ def saveFile(strId, dcInput):
     strFile = os.path.realpath(__file__)
     strPath = os.path.dirname(strFile)
     strSave = os.path.join(strPath, "dashboards", strId + '.json')
-    print strSave
+    print(strSave)
     f = open(strSave, 'w')
     f.write(json.dumps(dcInput))
     f.close()
@@ -25,7 +28,7 @@ def loadFile(strId):
     strFile = os.path.realpath(__file__)
     strPath = os.path.dirname(strFile)
     strSave = os.path.join(strPath, "dashboards", strId + '.json')
-    print strSave
+    print(strSave)
     f = open(strSave, 'r')
     objResponse = json.loads(f.read())
     f.close()
@@ -33,7 +36,7 @@ def loadFile(strId):
 
 
 dcDefinitions = loadFile("test")
-print dcDefinitions.get('widgets', None)
+print(dcDefinitions.get('widgets', None))
 objDashboard = DashingBoard(dcDefinitions)
 app = Flask(__name__)
 logging.basicConfig()
@@ -75,7 +78,7 @@ def loadContent(strPath):
             f.close()
             return contents
     except Exception as e:
-        print e
+        print(e)
     return ''
 
 @app.route("/")
@@ -101,8 +104,8 @@ def javascripts():
             if '.coffee' in path:
                 log.info('Compiling Coffee for %s ' % path)
                 contents = str(coffeescript.compile_file(path, bare=True))
-                print '-----------', path, '--------------'
-                print contents
+                print('-----------', path, '--------------')
+                print(contents)
             else:
                 contents = loadContent(path)
             current_app.javascripts += contents
@@ -157,9 +160,9 @@ def events():
 
 @app.route('/update', methods=['POST'])
 def update():
-    print request
+    print(request)
     content = request.get_json(silent=True)
-    print content
+    print(content)
     if content:
         objDashboard.updateLayout(content)
     return Response(json.dumps(True), mimetype='text/json')
@@ -190,7 +193,7 @@ def addValue():
 
 
 @app.route('/add/sampler', methods=['POST'])
-def addValue():
+def addSampler():
     objResponse = None
     dcSettings = request.get_json(silent=True)
     if dcSettings:
@@ -212,12 +215,12 @@ def push(strType, strUrl):
         #elif strType == 'xml':
         #    import xmltodict
         #    objContent = xmltodict.parse(request.data)
-        print request.args
-        print request.headers
+        print(request.args)
+        print(request.headers)
         if objContent:
             objResponse = objDashboard.push(strUrl, objContent)
     except Exception as e:
-        print e
+        print(e)
     return Response(json.dumps(objResponse), mimetype='text/json')
 
 
@@ -250,11 +253,12 @@ def close_stream(*args, **kwargs):
     log.info('Client %s disconnected. Total Clients: %s' % (event_stream_port, len(objDashboard._objStreams.events_queue)))
 
 
-
-
-
 if __name__ == "__main__":
-    import SocketServer
+    if sys.version_info >= (3, 0):
+        import socketserver as SocketServer
+    else:
+        import SocketServer
+
     SocketServer.BaseServer.handle_error = close_stream
     try:
         app.run(host="0.0.0.0",
@@ -264,10 +268,8 @@ if __name__ == "__main__":
                 use_reloader=False,
                 use_debugger=True
                 )
-        print "test"
     finally:
-        print "Disconnecting clients"
+        print("Disconnecting clients")
         saveFile("test", objDashboard.getSettings())
         objDashboard.stop()
-    print "Done"
     exit()

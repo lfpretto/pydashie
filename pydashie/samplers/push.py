@@ -1,4 +1,4 @@
-from sampler import DashingSampler
+from samplers.sampler import DashingSampler
 
 class PushSampler(DashingSampler):
     """ Sampler waits for a information to be pushed.

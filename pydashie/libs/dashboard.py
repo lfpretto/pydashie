@@ -1,7 +1,7 @@
 """ Dashboard
 """
 import os, json
-from pydashie.libs.streams import ConnectionStreams
+from libs.streams import ConnectionStreams
 
 
 class DashingBoard:
@@ -86,7 +86,7 @@ class DashingBoard:
         Returns:
 
         """
-        from pydashie.samplers.push import PushSampler
+        from samplers.push import PushSampler
         for objSampler in self._dcSamplers.values():
             if isinstance(objSampler, PushSampler):
                 objResponse = objSampler.received(strURL, objContent)
@@ -114,11 +114,11 @@ class DashingBoard:
         Returns:
 
         """
-        print self._dcWidgets
+        print(self._dcWidgets)
         while len(self._dcWidgets) > 0:
             strKey, objWidget = self._dcWidgets.popitem()  # [strKey]
             if not objWidget.stop():
-                print 'Error Deleting', strKey, 'Sampler'
+                print('Error Deleting', strKey, 'Sampler')
                 del objWidget
         self._dcWidgets = dict()
 
@@ -134,7 +134,7 @@ class DashingBoard:
                 self._arJavascript.append(strPath + '.js')
                 self._arStyles.append(strPath + '.css')
             else:
-                print 'not Loaded'
+                print('Not Loaded', dcWidget)
 
     def startWidget(self, dcSettings):
         """
@@ -148,11 +148,11 @@ class DashingBoard:
         strType = dcSettings.get('type', 'Number')
         try:
             import importlib
-            objModule = importlib.import_module("pydashie.widgets." + strType)
+            objModule = importlib.import_module("widgets." + strType)
             objWidgetClass = getattr(objModule, strType.title() + "Widget")
             objWidget = objWidgetClass(strId, self._objStreams, dcSettings)
         except Exception as e:
-            print e
+            print(e)
             return False
         else:
             self._addWidget(strId, objWidget)
@@ -188,7 +188,7 @@ class DashingBoard:
         while len(self._dcSamplers) > 0:
             strKey, objSampler = self._dcSamplers.popitem()
             if not objSampler.stop():
-                print 'Error Deleting', strKey, 'Sampler'
+                print('Error Deleting', strKey, 'Sampler')
                 del objSampler
         self._dcSamplers = dict()
 
@@ -210,14 +210,15 @@ class DashingBoard:
         strId = dcSettings.get('id', None)
         strType = dcSettings.get('type', None)
         if not strType:
-            print 'Invalid Type'
+            print('Invalid Type')
             return False
         try:
             import importlib
-            objModule = importlib.import_module("pydashie.samplers." + strType)
+            objModule = importlib.import_module("samplers." + strType)
             objSamplerClass = getattr(objModule, strType.title() + "Sampler")
         except Exception as e:
-            print e
+            print("TEST")
+            print(e)
             return False
         else:
             objSampler = objSamplerClass(self, dcSettings)

@@ -39,7 +39,7 @@ class DashingWidget:
         Returns:
             The Value of the parameter
         """
-        print self._dcLayout
+        print(self._dcLayout)
         return self._dcLayout.get(strId, '')
 
     def last(self):
@@ -135,7 +135,7 @@ class DashingWidget:
                                                                 title=self._strTitle,
                                                                 **self._dcSettings)
         except Exception as e:
-            print e
+            print(e)
             return False
         else:
             return True

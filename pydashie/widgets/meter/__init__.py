@@ -1,4 +1,4 @@
-from pydashie.libs.widget import DashingWidget
+from libs.widget import DashingWidget
 
 class MeterWidget(DashingWidget):
     def process(self, nValue):
@@ -6,7 +6,7 @@ class MeterWidget(DashingWidget):
         Calculate the necessary values for a Number to be sampler
         :return:
         '''
-        if nValue and isinstance(nValue, (int, long, float)):
+        if nValue and isinstance(nValue, (int, float)):
             self.storage(nValue)
             dcItem = {
                 'value': nValue,

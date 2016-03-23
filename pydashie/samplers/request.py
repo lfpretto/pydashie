@@ -1,5 +1,7 @@
-import requests, json
-from timer import TimerSampler
+
+import requests
+import json
+from samplers.timer import TimerSampler
 
 
 class RequestSampler(TimerSampler):
@@ -12,10 +14,10 @@ class RequestSampler(TimerSampler):
         }
 
     def _start(self):
-        print "start request sampler"
+        print("start request sampler")
 
     def _stop(self):
-        print "stop request sampler"
+        print("stop request sampler")
 
     def _sampler(self):
         try:
@@ -25,6 +27,6 @@ class RequestSampler(TimerSampler):
             if objResponse:
                 self._process(objResponse)
         except Exception as e:
-            print e
-            print 'Error'
+            print(e)
+            print('Error')
         return None

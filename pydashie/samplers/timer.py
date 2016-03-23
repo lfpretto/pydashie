@@ -1,4 +1,4 @@
-from sampler import DashingSampler
+from samplers.sampler import DashingSampler
 from threading import Timer
 
 class TimerSampler(DashingSampler):

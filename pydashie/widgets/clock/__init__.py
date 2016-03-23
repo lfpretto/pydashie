@@ -1,4 +1,4 @@
-from pydashie.libs.widget import DashingWidget
+from libs.widget import DashingWidget
 
 
 class ClockWidget(DashingWidget):

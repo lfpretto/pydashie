@@ -1,5 +1,10 @@
-import Queue
+import sys
 import json
+if sys.version_info >= (3, 0):
+    import queue as Queue
+else:
+    import Queue
+
 
 class ConnectionStreams:
     def __init__(self):
