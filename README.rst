@@ -12,6 +12,7 @@ This version makes the full dashboard more friendly and extensible, with:
 - Configurable samplers providing information to widgets.
 
 To do:
+
 - Editing interface.
 - Widget and Samplers Installation
 - Docker Integration
