@@ -4,7 +4,6 @@ import datetime
 
 class GraphWidget(DashingWidget):
     seedX = 0
-    renderTemplate = ''
 
     def process(self, arItems):
         '''
@@ -17,7 +16,7 @@ class GraphWidget(DashingWidget):
                 y = arItems[1]
             else:
                 y = int(arItems[0])
-                x = self.seedX #datetime.datetime.now().strftime('%H:%M')
+                x = self.seedX
             self.storage({'x': x, 'y': y})
             self._sendStorageAs('points')
             self.seedX += 1

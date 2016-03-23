@@ -42,8 +42,6 @@ class DashingSampler:
         Returns:
             bool: True
         """
-        print objData
-        print self._arWidgets
         for dcLink in self._arWidgets:
             objWidget = dcLink.get('object', None)
             strKey = dcLink.get('key', None)
@@ -51,7 +49,6 @@ class DashingSampler:
                 objSample = objData.get(strKey, None)
             else:
                 objSample = objData
-
             if objWidget and objSample:
                 objWidget.process(objSample)
         return True
@@ -87,17 +84,17 @@ class DashingSampler:
         Returns:
             None
         """
-        pass
+        return True
 
     def start(self):
         """ Child class implements this function
             This runs at the start of the sampler
 
         Returns:
-            None
+            True
         """
-        self._start()
-        pass
+        return self._start()
+
 
     def _stop(self):
         """  Used to Create another Extensible Class
@@ -106,14 +103,13 @@ class DashingSampler:
         Returns:
             None
         """
-        pass
+        return True
 
     def stop(self):
         """ Child class implements this function
             This runs at the end of the sampler
 
         Returns:
-            None
+            True
         """
-        self._stop()
-        pass
+        return self._stop()

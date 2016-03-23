@@ -30,3 +30,24 @@
   margin-left: -95px;
   padding: 15px;
  }
+
+.icon-background {
+  opacity: 0.2;
+  font-size: 200px;
+  line-height: 150px;
+}
+
+.gridster {
+    position:relative;
+}
+
+.gridster li header {
+    position: absolute;
+    top: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    left: 5px;
+    right: 5px;
+    z-index: 10;
+    font-size: 12px;
+}

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="PythonFiles" pattern="file:pydashie/main.py||file:pydashie/app.py||file:pydashie/webservice.py||file:pydashie/__init__.py||file[pydashie]:pydashie/libs//*||file[pydashie]:pydashie/samplers//*" />
+</component>

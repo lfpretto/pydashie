@@ -4,6 +4,11 @@ import os
 from flask import Flask, render_template, Response, send_from_directory, request, current_app
 from libs.dashboard import DashingBoard
 
+#TODO: save / load from file
+#TODO: GET in push sampler.
+#TODO: docker file
+#TODO: package installer
+
 
 def saveFile(strId, dcInput):
     import os, json
@@ -28,19 +33,57 @@ def loadFile(strId):
 
 
 dcDefinitions = loadFile("test")
+print dcDefinitions.get('widgets', None)
 objDashboard = DashingBoard(dcDefinitions)
 app = Flask(__name__)
 logging.basicConfig()
 log = logging.getLogger(__name__)
 
+arJavaScripts = [
+            'projects/dashing/javascripts/jquery.js',
+            'projects/dashing/templates/project/assets/javascripts/d3-3.2.8.js',
+            'projects/gridster/dist/jquery.gridster.min.js',
+            'projects/dashing/templates/project/assets/javascripts/gridster/jquery.leanModal.min.js',
+            'projects/dashing/templates/project/assets/javascripts/jquery.knob.js',
+            'projects/dashing/templates/project/assets/javascripts/rickshaw-1.4.3.min.js',
+            'projects/dashing/javascripts/es5-shim.js',
+            'projects/dashing/javascripts/batman.js',
+            'projects/dashing/javascripts/batman.jquery.js',
+            'projects/dashing/javascripts/dashing.js',
+            'projects/dashing/templates/project/assets/javascripts/dashing.gridster.js',
+            'dashingInternal.js',
+            'pyDashing.js'
+        ]
+
+arStyleSheets = [
+        'projects/fontawesome/css/font-awesome.min.css',
+        'projects/gridster/dist/jquery.gridster.min.css',
+        'projects/dashing/templates/project/assets/stylesheets/application.css',
+        'pyDashing.css'
+    ]
+
+strFontPath = 'projects/fontawesome/fonts'
+
+bForceReload = True
+
+
+def loadContent(strPath):
+    try:
+        if os.path.isfile(strPath):
+            f = open(strPath)
+            contents = f.read()
+            f.close()
+            return contents
+    except Exception as e:
+        print e
+    return ''
 
 @app.route("/")
 def main():
     strTitle = objDashboard._dcDefinitions.get('title', 'pyDashing')
     arWidgets = objDashboard.getWidget()
-    print arWidgets[0]
-    #print json.dumps(arWidgets)
-    return render_template('index.html', title=strTitle, widgets=arWidgets)
+    bEdit = request.args.get('edit', False)
+    return render_template('index.html', title=strTitle, widgets=arWidgets, edit=bEdit)
     
 @app.route("/dashboard/<dashlayout>/")
 def custom_layout(dashlayout):
@@ -48,29 +91,12 @@ def custom_layout(dashlayout):
 
 @app.route("/assets/application.js")
 def javascripts():
-    if not hasattr(current_app, 'javascripts'):
-        scripts = [
-            'assets/javascripts/jquery.js',
-            'assets/javascripts/d3-3.2.8.js',
-            'assets/javascripts/gridster/jquery.gridster.min.js',
-            'assets/javascripts/gridster/jquery.leanModal.min.js',
-            'assets/javascripts/jquery.knob.js',
-            'assets/javascripts/rickshaw-1.4.3.min.js',
-            'assets/javascripts/es5-shim.js',
-            'assets/javascripts/batman.js',
-            'assets/javascripts/batman.jquery.js',
-            'assets/javascripts/dashing.js',
-            'assets/javascripts/dashing.gridster.js',
-            #'assets/javascripts/application.js',
-            'dashingInternal.js',
-            'pyDashing.js'
-        ]
-        print scripts
-        print objDashboard._arJavascript
-        scripts.extend(objDashboard._arJavascript)
+    global arJavaScripts, bForceReload
+    if not hasattr(current_app, 'javascripts') or bForceReload:
+        arJavaScripts.extend(objDashboard._arJavascript)
         current_app.javascripts = ""
         import coffeescript
-        for path in scripts:
+        for path in arJavaScripts:
             current_app.javascripts += '// JS: %s\n' % str(path)
             if '.coffee' in path:
                 log.info('Compiling Coffee for %s ' % path)
@@ -78,32 +104,31 @@ def javascripts():
                 print '-----------', path, '--------------'
                 print contents
             else:
-                f = open(path)
-                contents = f.read()
-                f.close()
+                contents = loadContent(path)
             current_app.javascripts += contents
     return Response(current_app.javascripts, mimetype='application/javascript')
 
+@app.route("/assets/edit.js")
+def edit():
+    return Response(loadContent('edit.js'), mimetype='application/javascript')
+
 @app.route('/assets/application.css')
-def application_css():
-    scripts = [
-        'assets/stylesheets/font-awesome.css',
-        'assets/stylesheets/application.css',
-        'assets/stylesheets/jquery.gridster.min.css',
-        'pyDashing.css'
-    ]
-    scripts.extend(objDashboard._arStyles)
+def stylesheets():
+    global arStyleSheets
+    arStyleSheets.extend(objDashboard._arStyles)
     output = ''
-    for path in scripts:
-        output += open(path).read()
+    for strPath in arStyleSheets:
+        output += loadContent(strPath)
     return Response(output, mimetype='text/css')
 
-
-@app.route('/fonts/<path:path>')
-def send_js(path):
-    return send_from_directory('assets/fonts', path)
+@app.route('/assets/fonts/<path:strPath>')
+@app.route('/fonts/<path:strPath>')
+def send_js(strPath):
+    global strFontPath
+    return send_from_directory(strFontPath, strPath)
 
 @app.route('/assets/images/<path:filename>')
+@app.route('/images/<path:filename>')
 def send_static_img(filename):
     directory = os.path.join('assets', 'images')
     return send_from_directory(directory, filename)
@@ -112,39 +137,23 @@ def send_static_img(filename):
 def widget_html(widget_name):
     if widget_name == 'dashing_internal':
         return '<span data-bind="internal"></span>'
-
     if '_' in widget_name:
         arTitles = [s.title() for s in widget_name.split('_')]
-        print arTitles
         arTitles[0] = arTitles[0].lower()
         strWidget = ''.join(arTitles)
     else:
         strWidget = widget_name
-
-
-    print "+++++++++++++++++", strWidget
     html = '%s.html' % widget_name
-    path = os.path.join('widgets', strWidget, html)
-    if os.path.isfile(path):
-        f = open(path)
-        contents = f.read()
-        f.close()
-        return contents
-    else:
-        # print "+++++++++++++++++ cant find ", widget_name
-        return ""
+    return loadContent(os.path.join('widgets', strWidget, html))
 
-@app.route('/add/<widget_id>/<nValue>')
-def addValue(widget_id, nValue):
-    response = objDashboard.push(widget_id, nValue)
-    return Response(json.dumps(response), mimetype='text/json')
+
 
 @app.route('/events')
 def events():
     event_stream_port = request.environ['REMOTE_PORT']
     current_app.logger.info('New Client %s connected. Total Clients: %s' % (event_stream_port, len(objDashboard._objStreams)))
-    #current_event_queue = xyzzy.openStream(event_stream_port)
     return Response(objDashboard._objStreams.openStream(event_stream_port), mimetype='text/event-stream')
+
 
 @app.route('/update', methods=['POST'])
 def update():
@@ -156,33 +165,10 @@ def update():
     return Response(json.dumps(True), mimetype='text/json')
 
 
-@app.route('/reload')
+@app.route('/reload', methods=['GET'])
 def reload():
-    import datetime
-    objReload = {"id": 'dashing-internal-functions', "action": "reload", "updatedAt":0}
-    objDashboard._objStreams.send(objReload, False)
-    return Response(json.dumps(objReload), mimetype='text/json')
-
-
-@app.route('/test')
-@app.route('/test/<strType>')
-def test(strType='number'):
-    import random
-    if strType.lower() == 'number':
-        response = {"value": random.randint(0,100)}
-    elif strType.lower() == 'list':
-        response = {"value": [random.randint(0,100)]}
-    else:
-        response = {"value": None}
-
-    response = {
-        "number1": random.randint(0,100),
-        "number2": random.randint(0,100),
-        "graph1": [random.randint(0,100)]
-    }
-
-    #print response
-    return Response(json.dumps(response), mimetype='text/json')
+    bResponse = objDashboard.refresh()
+    return Response(json.dumps(bResponse), mimetype='text/json')
 
 
 @app.route('/shutdown', methods=['GET'])
@@ -193,6 +179,59 @@ def shutdown():
     func()
     return 'Server shutting down...'
 
+
+@app.route('/add/widget', methods=['POST'])
+def addValue():
+    objResponse = None
+    dcSettings = request.get_json(silent=True)
+    if dcSettings:
+        objResponse = objDashboard.startWidget(dcSettings)
+    return Response(json.dumps(objResponse), mimetype='text/json')
+
+
+@app.route('/add/sampler', methods=['POST'])
+def addValue():
+    objResponse = None
+    dcSettings = request.get_json(silent=True)
+    if dcSettings:
+        objResponse = objDashboard.startSampler(dcSettings)
+    return Response(json.dumps(objResponse), mimetype='text/json')
+
+
+@app.route('/push/<strType>/<path:strUrl>', methods=['POST'])
+def push(strType, strUrl):
+    objResponse = False
+    try:
+        strType = strType.lower()
+        if strType == 'json':
+            objContent = request.get_json(silent=True)
+        elif strType == 'integer':
+            objContent = int(request.data)
+        elif strType == 'decimal':
+            objContent = float(request.data)
+        #elif strType == 'xml':
+        #    import xmltodict
+        #    objContent = xmltodict.parse(request.data)
+        print request.args
+        print request.headers
+        if objContent:
+            objResponse = objDashboard.push(strUrl, objContent)
+    except Exception as e:
+        print e
+    return Response(json.dumps(objResponse), mimetype='text/json')
+
+
+@app.route('/test')
+def test():
+    import random
+    response = {
+        "number1": random.randint(0,100),
+        "number2": random.randint(0,100),
+        "number3": random.randint(0,100),
+        "graph1": [random.randint(0,100)],
+        "graph2": [random.randint(0,100)]
+    }
+    return Response(json.dumps(response), mimetype='text/json')
 
 
 
@@ -228,7 +267,7 @@ if __name__ == "__main__":
         print "test"
     finally:
         print "Disconnecting clients"
-        saveFile("test", objDashboard._dcDefinitions)
+        saveFile("test", objDashboard.getSettings())
         objDashboard.stop()
     print "Done"
     exit()

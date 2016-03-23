@@ -22,7 +22,6 @@ class DashingBoard:
         self._arStyles = list()
         self._loadSamplers()
         self._loadWidgets()
-        self._reloads=0
 
     def __del__(self):
         self._unloadWidgets()
@@ -54,13 +53,20 @@ class DashingBoard:
                 objWidget.updateLayout(dcLayout)
             else:
                 bReturn = False
+        self.refresh()
+        return bReturn
+
+    def refresh(self):
+        """
+
+        Returns:
+
+        """
         objReload = {"id": 'dashing-internal-functions',
                      "action": "reload",
-                     "updatedAt": self._reloads}
-        self._reloads += 1
-        print "SEND RELOAD"
-        self._objStreams.send(objReload, False)
-        return bReturn
+                     "updatedAt": 1}
+        return self._objStreams.send(objReload, False)
+
 
     def stop(self):
         """
@@ -70,28 +76,25 @@ class DashingBoard:
         self._unloadSamplers()
         self._unloadWidgets()
 
-    def push(self, strWidgetId, objData):
+    def push(self, strURL, objContent):
         """
+
         Args:
-            strWidgetId:
+            strSamplerId:
             objData:
 
         Returns:
 
         """
-        objWidget = self._dcWidgets.get(strWidgetId)
-        if objWidget:
-            objResponse = objWidget.process(objData)
-            if objResponse:
-                return objResponse
-            else:
-                return True
+        from pydashie.samplers.push import PushSampler
+        for objSampler in self._dcSamplers.values():
+            if isinstance(objSampler, PushSampler):
+                objResponse = objSampler.received(strURL, objContent)
+                if objResponse:
+                    return objResponse
         return False
 
-    def renderHTML(self):
-        pass
-
-    def renderDashboard(self, bDebug=False):
+    def render(self, bDebug=False):
         pass
 
     def getWidget(self, strId=None):
@@ -102,7 +105,7 @@ class DashingBoard:
 
     def _linkWidget(self, objWidget, dcSamplerSettings):
         strId = dcSamplerSettings.get('id', None)
-        strValue = dcSamplerSettings.get('key', 'value')
+        strValue = dcSamplerSettings.get('key', None)
         if strId in self._dcSamplers:
             self._dcSamplers[strId].addWidget(objWidget, strValue)
 
@@ -125,7 +128,7 @@ class DashingBoard:
 
         """
         for dcWidget in self._arWidgetSettings:
-            if self._startWidget(dcWidget):
+            if self.startWidget(dcWidget):
                 strType = dcWidget.get('type')
                 strPath = os.path.join('widgets', strType, strType)
                 self._arJavascript.append(strPath + '.js')
@@ -133,7 +136,7 @@ class DashingBoard:
             else:
                 print 'not Loaded'
 
-    def _startWidget(self, dcSettings):
+    def startWidget(self, dcSettings):
         """
         Args:
             dcSettings:
@@ -147,21 +150,16 @@ class DashingBoard:
             import importlib
             objModule = importlib.import_module("pydashie.widgets." + strType)
             objWidgetClass = getattr(objModule, strType.title() + "Widget")
+            objWidget = objWidgetClass(strId, self._objStreams, dcSettings)
         except Exception as e:
             print e
             return False
         else:
-            objWidget = objWidgetClass(strId, self._objStreams, dcSettings)
-        if objWidget.start():
             self._addWidget(strId, objWidget)
             dcSampler = dcSettings.get('sampler', None)
             if dcSampler:
                 self._linkWidget(objWidget, dcSampler)
             return True
-        else:
-            print objWidget
-            print 'not Started'
-        return False
 
     def _addWidget(self, strID, objWidget):
         """
@@ -179,7 +177,6 @@ class DashingBoard:
             self._dcWidgets[strID] = objWidget
             return True
         return False
-
 
 
 
@@ -201,10 +198,10 @@ class DashingBoard:
 
         """
         for dcSampler in self._arSamplerSettings:
-          self._startSampler(dcSampler)
+          self.startSampler(dcSampler)
 
 
-    def _startSampler(self, dcSettings):
+    def startSampler(self, dcSettings):
         """ Runs the Widget SAMPLER based on the 'sampler' configs in the settings.
 
         Returns:
